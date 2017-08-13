@@ -3,17 +3,21 @@ import ReactDOM from 'react-dom'
 import ListPage from './components/ListPage'
 import CreatePage from './components/CreatePage'
 import DetailPage from './components/DetailPage'
-import {BrowserRouter as Router, Route} from 'react-router-dom'
-import {ApolloProvider, createNetworkInterface, ApolloClient} from 'react-apollo'
+import { BrowserRouter as Router, Route } from 'react-router-dom'
+import {
+  ApolloProvider,
+  createNetworkInterface,
+  ApolloClient,
+} from 'react-apollo'
 import 'tachyons'
 import './index.css'
 
 const networkInterface = createNetworkInterface({
-// __SIMPLE_API_ENDPOINT__ looks similar to: `https://api.graph.cool/simple/v1/<PROJECT_ID>`
-  uri: '__SIMPLE_API_ENDPOINT__'
+  // __SIMPLE_API_ENDPOINT__ looks similar to: `https://api.graph.cool/simple/v1/<PROJECT_ID>`
+  uri: 'https://api.graph.cool/simple/v1/cj6b0ax9z031h0101i7o74fee',
 })
 
-const client = new ApolloClient({networkInterface})
+const client = new ApolloClient({ networkInterface })
 
 ReactDOM.render(
   <ApolloProvider client={client}>
@@ -25,5 +29,5 @@ ReactDOM.render(
       </div>
     </Router>
   </ApolloProvider>,
-  document.getElementById('root'),
+  document.getElementById('root')
 )
