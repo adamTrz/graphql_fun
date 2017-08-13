@@ -25,7 +25,6 @@ class ListPage extends Component {
   }
 
   render() {
-    console.log('process', process)
     if (this.props.data.loading) {
       return (
         <div className='flex w-100 h-100 items-center justify-center pt7'>
