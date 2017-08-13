@@ -1,8 +1,11 @@
-import React from 'react'
+/** @flow*/
+import React, { Component } from 'react'
 import { gql, graphql } from 'react-apollo'
 import Modal from 'react-modal'
 import modalStyle from '../constants/modalStyle'
-import {withRouter} from 'react-router-dom'
+import { withRouter } from 'react-router-dom'
+
+import type { PostType } from '../types'
 
 const detailModalStyle = {
   overlay: modalStyle.overlay,
@@ -12,8 +15,17 @@ const detailModalStyle = {
   },
 }
 
-class DetailPage extends React.Component {
+type Props = {
+  data: {
+    loading: boolean,
+    Post: PostType,
+  },
+  history: Object,
+  mutate: (*) => Promise<*>,
+};
 
+class DetailPage extends Component {
+  props: Props;
   render() {
     if (this.props.data.loading) {
       return (
@@ -26,7 +38,7 @@ class DetailPage extends React.Component {
       )
     }
 
-    const {Post} = this.props.data
+    const { Post } = this.props.data
 
     return (
       <Modal
@@ -70,11 +82,11 @@ class DetailPage extends React.Component {
   // would be nice to trigger a "deleting... -> deleted." snackbar-style notification
   // while this runs
   handleDelete = async () => {
-    await this.props.mutate({variables: {id: this.props.data.Post.id}})
+    await this.props.mutate({ variables: { id: this.props.data.Post.id } })
 
     // post is gone, so remove it from history stack
     this.props.history.replace('/')
-  }
+  };
 }
 
 const deleteMutation = gql`
@@ -100,7 +112,7 @@ const PostQuery = gql`
 // see documentation on computing query variables from props in wrapper
 // http://dev.apollodata.com/react/queries.html#options-from-props
 const DetailPageWithData = graphql(PostQuery, {
-  options: ({match}) => ({
+  options: ({ match }) => ({
     variables: {
       id: match.params.id,
     },

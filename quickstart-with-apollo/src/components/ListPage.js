@@ -1,10 +1,23 @@
-import React from 'react'
+/* @flow */
+import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import Post from '../components/Post'
 import { gql, graphql } from 'react-apollo'
 
-class ListPage extends React.Component {
+import type { PostType } from '../types'
 
+type Props = {
+  data: {
+    loading: boolean,
+    refetch: (void) => Promise<*>,
+    allPosts: Array<PostType>,
+  },
+  children: React.Element<*>,
+  location: Object,
+};
+
+class ListPage extends Component {
+  props: Props;
   componentWillReceiveProps(nextProps) {
     if (this.props.location.key !== nextProps.location.key) {
       this.props.data.refetch()
@@ -12,6 +25,7 @@ class ListPage extends React.Component {
   }
 
   render() {
+    console.log('process', process)
     if (this.props.data.loading) {
       return (
         <div className='flex w-100 h-100 items-center justify-center pt7'>
@@ -31,7 +45,7 @@ class ListPage extends React.Component {
 
     return (
       <div className={'w-100 flex justify-center pa6' + blurClass}>
-        <div className='w-100 flex flex-wrap' style={{maxWidth: 1150}}>
+        <div className='w-100 flex flex-wrap' style={{ maxWidth: 1150 }}>
           <Link
             to='/create'
             className='ma3 box new-post br2 flex flex-column items-center justify-center ttu fw6 f20 black-30 no-underline'
@@ -67,7 +81,7 @@ const FeedQuery = gql`query allPosts {
 
 const ListPageWithData = graphql(FeedQuery, {
   options: {
-    fetchPolicy: 'network-only'
+    fetchPolicy: 'network-only',
   },
 })(ListPage)
 
