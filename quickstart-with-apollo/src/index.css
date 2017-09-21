@@ -1,17 +1,19 @@
-@import 'https://fonts.googleapis.com/css?family=Open+Sans:300,400';
+@import 'https://fonts.googleapis.com/css?family=Open+Sans:300, 400';
 
 body {
   margin: 0;
   padding: 0;
   font-family: 'Open Sans', sans-serif;
-  background: rgba(0,0,0,.05);
+  background: rgba(0, 0, 0, 0.05);
 }
 
 html {
   box-sizing: border-box;
 }
 
-*, *:before, *:after {
+*,
+*:before,
+*:after {
   box-sizing: inherit;
 }
 
@@ -21,7 +23,7 @@ html {
 }
 
 .post {
-  box-shadow: 0 1px 6px rgba(0,0,0,.15);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.15);
 }
 
 .post .image {
@@ -49,7 +51,7 @@ html {
 }
 
 .new-post {
-  background-color: rgba(0,0,0,0.04);
+  background-color: rgba(0, 0, 0, 0.04);
 }
 
 .plus {
@@ -72,10 +74,19 @@ html {
 }
 
 .delete {
-  background-color: rgb(242,92,94);
+  background-color: rgb(242, 92, 94);
   font-size: 14px;
   padding: 6px 9px 7px 9px;
   letter-spacing: 0.46px;
   margin-top: 18px;
   margin-left: 18px;
+}
+
+.delete-small {
+  width: 75px;
+  opacity: 0;
+  z-index: 2;
+}
+.image:hover .delete-small {
+  opacity: 1;
 }

@@ -10,19 +10,20 @@ type Props = {
   data: {
     loading: boolean,
     refetch: (void) => Promise<*>,
-    allPosts: Array<PostType>,
+    allPosts: Array<PostType>
   },
   children: React.Element<*>,
-  location: Object,
+  location: Object
 };
 
 class ListPage extends Component {
   props: Props;
-  componentWillReceiveProps(nextProps) {
-    if (this.props.location.key !== nextProps.location.key) {
-      this.props.data.refetch()
-    }
-  }
+  // commented out to demonstrate optimisticUpdate
+  // componentWillReceiveProps(nextProps) {
+  //   if (this.props.location.key !== nextProps.location.key) {
+  //     this.props.data.refetch()
+  //   }
+  // }
 
   render() {
     if (this.props.data.loading) {
@@ -78,10 +79,6 @@ const FeedQuery = gql`query allPosts {
   }
 }`
 
-const ListPageWithData = graphql(FeedQuery, {
-  options: {
-    fetchPolicy: 'network-only',
-  },
-})(ListPage)
+const ListPageWithData = graphql(FeedQuery)(ListPage)
 
 export default ListPageWithData
