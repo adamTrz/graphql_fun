@@ -2,14 +2,14 @@
 
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import { gql, graphql } from 'react-apollo'
+import { gql, graphql, compose } from 'react-apollo'
 
 import type { PostType } from '../types'
 
 type Props = {
   post: PostType,
-  mutate: (*) => Promise<*>,
-  history: Object,
+  deletePost: (postId: string) => Promise<*>,
+  history: Object
 };
 
 class Post extends Component {
@@ -26,9 +26,16 @@ class Post extends Component {
             backgroundImage: `url(${this.props.post.imageUrl})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            paddingBottom: '100%',
+            paddingBottom: '100%'
           }}
-        />
+        >
+          <div
+            className='delete ttu white pointer fw6 delete-small left-0 top-0 br2'
+            onClick={this.handleDelete}
+          >
+            Delete
+          </div>
+        </div>
         <div className='flex items-center black-80 fw3 description'>
           {this.props.post.description}
         </div>
@@ -36,13 +43,19 @@ class Post extends Component {
     )
   }
 
-  // not currently used.
-  handleDelete = async () => {
-    await this.props.mutate({ variables: { id: this.props.post.id } })
-    this.props.history.replace('/')
+  handleDelete = (e: SyntheticMouseEvent) => {
+    e.preventDefault()
+    this.props.deletePost(this.props.post.id)
   };
 }
 
+const FeedQuery = gql`query allPosts {
+  allPosts(orderBy: createdAt_DESC) {
+    id
+    imageUrl
+    description
+  }
+}`
 const deleteMutation = gql`
   mutation deletePost($id: ID!) {
     deletePost(id: $id) {
@@ -51,6 +64,36 @@ const deleteMutation = gql`
   }
 `
 
-const PostWithMutation = graphql(deleteMutation)(Post)
+// Refetch:
+// export default graphql(deleteMutation, {
+//   props: ({ ownProps, mutate }) => ({
+//     deletePost: postId =>
+//       mutate({
+//         variables: { id: postId },
+//         refetchQueries: [{ query: FeedQuery }]
+//       })
+//   })
+// })(Post)
 
-export default PostWithMutation
+// Store Update
+export default compose(
+  graphql(deleteMutation, {
+    props: ({ ownProps, mutate }) => ({
+      deletePost: postId =>
+        mutate({
+          variables: { id: postId },
+          update: (store, { data: { deletePost } }) => {
+            const posts = store.readQuery({
+              query: FeedQuery
+            })
+            store.writeQuery({
+              query: FeedQuery,
+              data: {
+                allPosts: posts.allPosts.filter(post => post.id !== postId)
+              }
+            })
+          }
+        })
+    })
+  })
+)(Post)
