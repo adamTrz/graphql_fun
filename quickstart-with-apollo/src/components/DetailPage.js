@@ -1,6 +1,6 @@
 /** @flow*/
 import React, { Component } from 'react'
-import { gql, graphql } from 'react-apollo'
+import { gql, graphql, compose } from 'react-apollo'
 import Modal from 'react-modal'
 import modalStyle from '../constants/modalStyle'
 import { withRouter } from 'react-router-dom'
@@ -11,21 +11,31 @@ const detailModalStyle = {
   overlay: modalStyle.overlay,
   content: {
     ...modalStyle.content,
-    height: 761,
-  },
+    height: 761
+  }
 }
 
 type Props = {
   data: {
     loading: boolean,
-    Post: PostType,
+    Post: PostType
   },
   history: Object,
-  mutate: (*) => Promise<*>,
+  deletePost: (postId: string) => Promise<*>,
+  updatePost: (postId: string, description: string) => Promise<*>
+};
+
+type State = {
+  post: ?PostType
 };
 
 class DetailPage extends Component {
+  state: State = { post: null };
   props: Props;
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.data.Post) this.setState({ post: nextProps.data.Post })
+  }
+
   render() {
     if (this.props.data.loading) {
       return (
@@ -38,8 +48,8 @@ class DetailPage extends Component {
       )
     }
 
-    const { Post } = this.props.data
-
+    const { post } = this.state
+    if (!post) return null
     return (
       <Modal
         isOpen
@@ -65,27 +75,31 @@ class DetailPage extends Component {
           <div
             className='image'
             style={{
-              backgroundImage: `url(${Post.imageUrl})`,
+              backgroundImage: `url(${post.imageUrl})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
-              paddingBottom: '100%',
+              paddingBottom: '100%'
             }}
           />
           <div className='flex items-center black-80 fw3 description'>
-            {Post.description}
+            <input
+              type='text'
+              value={post.description}
+              onChange={this.editDescription}
+            />
+
           </div>
         </div>
       </Modal>
     )
   }
 
-  // would be nice to trigger a "deleting... -> deleted." snackbar-style notification
-  // while this runs
-  handleDelete = async () => {
-    await this.props.mutate({ variables: { id: this.props.data.Post.id } })
+  handleDelete = () => {
+    this.state.post && this.props.deletePost(this.state.post.id)
+  };
 
-    // post is gone, so remove it from history stack
-    this.props.history.replace('/')
+  editDescription = (e: SyntheticInputEvent) => {
+    this.props.updatePost(this.state.post.id, e.target.value)
   };
 }
 
@@ -106,19 +120,58 @@ const PostQuery = gql`
     }
   }
 `
+const updateMutation = gql`
+  mutation updatePost($id: ID!, $description: String!) {
+    updatePost(id: $id, description: $description) {
+    id description
+  }
+}
+`
 
-// update w/ react-router v4 url params api
-//
-// see documentation on computing query variables from props in wrapper
-// http://dev.apollodata.com/react/queries.html#options-from-props
-const DetailPageWithData = graphql(PostQuery, {
-  options: ({ match }) => ({
-    variables: {
-      id: match.params.id,
-    },
+// export default withRouter(
+//   graphql(deleteMutation)(
+//     graphql(PostQuery, {
+//       options: ({ match }) => ({
+//         variables: {
+//           id: match.params.id
+//         }
+//       })
+//     })(DetailPage)
+//   )
+// )
+
+// Otimistic Response
+export default compose(
+  withRouter,
+  graphql(deleteMutation, {
+    props: ({ ownProps, mutate }) => ({
+      deletePost: postId =>
+        mutate({
+          variables: { id: postId }
+        })
+    })
   }),
-})(DetailPage)
-
-const DetailPageWithDelete = graphql(deleteMutation)(DetailPageWithData)
-
-export default withRouter(DetailPageWithDelete)
+  graphql(updateMutation, {
+    props: ({ ownProps, mutate }) => ({
+      updatePost: (postId, description) =>
+        mutate({
+          variables: { id: postId, description },
+          optimisticResponse: {
+            __typename: 'Mutation',
+            updatePost: {
+              id: postId,
+              description,
+              __typename: 'Post'
+            }
+          }
+        })
+    })
+  }),
+  graphql(PostQuery, {
+    options: ({ match }) => ({
+      variables: {
+        id: match.params.id
+      }
+    })
+  })
+)(DetailPage)
