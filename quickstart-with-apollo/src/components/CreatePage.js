@@ -1,15 +1,14 @@
 import React from 'react'
 import { withRouter } from 'react-router-dom'
-import { gql, graphql} from 'react-apollo'
+import { gql, graphql } from 'react-apollo'
 import Modal from 'react-modal'
 import modalStyle from '../constants/modalStyle'
 
 class CreatePage extends React.Component {
-
   state = {
     description: '',
-    imageUrl: '',
-  }
+    imageUrl: ''
+  };
 
   render() {
     return (
@@ -20,7 +19,7 @@ class CreatePage extends React.Component {
         onRequestClose={this.props.history.goBack}
       >
         <div className='pa4 flex justify-center bg-white'>
-          <div style={{maxWidth: 400}} className=''>
+          <div style={{ maxWidth: 400 }} className=''>
             {this.state.imageUrl &&
               <img
                 src={this.state.imageUrl}
@@ -31,14 +30,14 @@ class CreatePage extends React.Component {
               className='w-100 pa3 mv2'
               value={this.state.imageUrl}
               placeholder='Image Url'
-              onChange={e => this.setState({imageUrl: e.target.value})}
+              onChange={e => this.setState({ imageUrl: e.target.value })}
               autoFocus
             />
             <input
               className='w-100 pa3 mv2'
               value={this.state.description}
               placeholder='Description'
-              onChange={e => this.setState({description: e.target.value})}
+              onChange={e => this.setState({ description: e.target.value })}
             />
             {this.state.description &&
               this.state.imageUrl &&
@@ -55,11 +54,11 @@ class CreatePage extends React.Component {
   }
 
   handlePost = async () => {
-    const {description, imageUrl} = this.state
-    await this.props.addPost({variables: {description, imageUrl}})
-
-    window.location.pathname = '/'
-  }
+    const { description, imageUrl } = this.state
+    this.props
+      .addPost({ variables: { description, imageUrl } })
+      .then(this.props.history.goBack)
+  };
 }
 
 const addMutation = gql`
@@ -71,7 +70,6 @@ const addMutation = gql`
     }
   }
 `
-
-const PageWithMutation = graphql(addMutation, {name: 'addPost'})(CreatePage)
-
-export default withRouter(PageWithMutation)
+export default withRouter(
+  graphql(addMutation, { name: 'addPost' })(CreatePage)
+)
