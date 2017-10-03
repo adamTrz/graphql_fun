@@ -18,12 +18,6 @@ type Props = {
 
 class ListPage extends Component {
   props: Props;
-  // commented out to demonstrate optimisticUpdate
-  // componentWillReceiveProps(nextProps) {
-  //   if (this.props.location.key !== nextProps.location.key) {
-  //     this.props.data.refetch()
-  //   }
-  // }
 
   render() {
     if (this.props.data.loading) {

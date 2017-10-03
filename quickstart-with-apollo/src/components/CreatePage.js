@@ -70,6 +70,20 @@ const addMutation = gql`
     }
   }
 `
+
+const FeedQuery = gql`query allPosts {
+  allPosts(orderBy: createdAt_DESC) {
+    id
+    imageUrl
+    description
+  }
+}`
+
 export default withRouter(
-  graphql(addMutation, { name: 'addPost' })(CreatePage)
+  graphql(addMutation, {
+    name: 'addPost',
+    options: {
+      refetchQueries: [{ query: FeedQuery }]
+    }
+  })(CreatePage)
 )
